@@ -1,4 +1,5 @@
-# Put truststore into SSLContext
+# Fix app.javapki.DefaultSSLSocketTest.shouldHandshakeWithLocalhost
+# (Put truststore into SSLContext)
 - Generate truststore with two trusted certs: ca_root.cer and trustme.cer
 - Dont't use default SSLSocketFactory. Create SSLSocketFactory using SSLContext. But first initialize SSLContext with the truststore.
 
