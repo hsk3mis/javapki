@@ -52,14 +52,20 @@ public class DefaultSSLSocketTest extends BaseIntegrationTest {
             successOnLocalhostHostnameVerification();
 
             SSLContext ctx = SSLContext.getInstance("TLS");
+
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-            KeyStore ks = KeyStore.getInstance("JKS");
-
+            KeyStore truststore = KeyStore.getInstance("JKS");
             InputStream clientTrustStoreInputStream = DefaultSSLSocketTest.class.getResourceAsStream("/client_truststore.jks");
-            ks.load(clientTrustStoreInputStream, "changeit".toCharArray());
+            truststore.load(clientTrustStoreInputStream, "changeit".toCharArray());
+            tmf.init(truststore);
 
-            tmf.init(ks);
-            ctx.init(null, tmf.getTrustManagers(), null);
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+            KeyStore keystore = KeyStore.getInstance("JKS");
+            InputStream clientKeystoreInputStream = DefaultSSLSocketTest.class.getResourceAsStream("/mr_client.jks");
+            keystore.load(clientKeystoreInputStream, "changeit".toCharArray());
+            kmf.init(keystore, "changeit".toCharArray());
+
+            ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
             SSLSocketFactory factory = ctx.getSocketFactory();
             SSLSocket socket = (SSLSocket) factory.createSocket("localhost", localServerPort);
