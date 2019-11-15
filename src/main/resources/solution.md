@@ -1,32 +1,24 @@
-Create private key and self-signed certificate and place it in resources
+Import all server's untrusted certificates to new client's keystore
+
 ```
-$JAVA_HOME/bin/keytool -genkeypair -dname "cn=trustme.com" -keyalg RSA -keystore trustmekey.jks
+$JAVA_HOME/bin/keytool -importcert -alias caroot -file ca_root.cer -keystore client_truststore.jks
+$JAVA_HOME/bin/keytool -importcert -alias trustmeserver -file trustme.cer -keystore client_truststore.jks
 ```
 
-Generate a Certificate Sign Request for public key stored in keystore
+Create SSL socket like the boss
 ```
-$JAVA_HOME/bin/keytool -certreq -keystore trustmekey.jks -file trustme.req
-```
+SSLContext ctx = SSLContext.getInstance("TLS");
+TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+KeyStore ks = KeyStore.getInstance("JKS");
 
-Sign the CSR in the name of CA
-```
-$JAVA_HOME/bin/keytool -gencert -infile trustme.req -keystore ca_root.jks -outfile trustme.cer
-```
+InputStream clientTrustStoreInputStream = DefaultSSLSocketTest.class.getResourceAsStream("/client_truststore.jks");
+ks.load(clientTrustStoreInputStream, "changeit".toCharArray());
 
-Export CA certificate from CA's keystore
-```
-$JAVA_HOME/bin/keytool -exportcert -keystore ca_root.jks -file ca_root.cer
-```
+tmf.init(ks);
+ctx.init(null, tmf.getTrustManagers(), null);
 
-Import CA certificate to trustme keystore
-```
-$JAVA_HOME/bin/keytool -importcert -alias caroot -file ca_root.cer -keystore trustmekey.jks
-$JAVA_HOME/bin/keytool -importcert -alias mykey -file trustme.cer -keystore trustmekey.jks
-```
-
-Change Spring configuration key
-```
-server.ssl.key-store=classpath:trustmekey.jks
+SSLSocketFactory factory = ctx.getSocketFactory();
+SSLSocket socket = (SSLSocket) factory.createSocket("localhost", localServerPort);
 ```
 
 [Check it](https://localhost:8443)

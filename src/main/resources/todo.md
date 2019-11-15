@@ -1,6 +1,5 @@
-# Configure TLS on a server
-- generate a key pair [keytool guide](https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html#keytool_option_genkeypair)
-- create a CSR for trustme.com
-- verify and sign the CSR using RootCA's private key stored in ca_root.jks
-- import certificates to keystore/truststore
-- change Spring SSL configuration to use the trustme.com certificate [spring guide](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-configure-ssl)
+# Put truststore into SSLContext
+- Generate truststore with two trusted certs: ca_root.cer and trustme.cer
+- Dont't use default SSLSocketFactory. Create SSLSocketFactory using SSLContext. But first initialize SSLContext with the truststore.
+
+Sample code using keystores and truststores can be found in [the official documentation](https://docs.oracle.com/javase/10/security/sample-code-illustrating-secure-socket-connection-client-and-server.htm)    
